@@ -1,11 +1,10 @@
 package gps;
 
-import java.util.*;
-
 import gps.api.GPSProblem;
 import gps.api.GPSRule;
 import gps.api.GPSState;
-import sokoban.SokobanState;
+
+import java.util.*;
 
 public class GPSEngine {
 
@@ -21,8 +20,19 @@ public class GPSEngine {
 	protected SearchStrategy strategy;
 
 	public GPSEngine(GPSProblem myProblem, SearchStrategy myStrategy) {
-		open = new LinkedList<>();
-		bestCosts = new HashMap<GPSState, Integer>();
+		open = new PriorityQueue<>((o1, o2) -> {
+		    switch (myStrategy) {
+                case BFS:
+                    return o1.getCost() - o2.getCost();
+                case DFS:
+                    return o2.getCost() - o1.getCost();
+                case GREEDY:
+                    return myProblem.getHValue(o1.getState()) - myProblem.getHValue(o2.getState());
+                default:
+                    throw new IllegalArgumentException("Strategy not implemented");
+            }
+        });
+		bestCosts = new HashMap<>();
 		problem = myProblem;
 		strategy = myStrategy;
 		explosionCounter = 0;
@@ -66,7 +76,8 @@ public class GPSEngine {
 			}
 			newCandidates = new ArrayList<>();
 			addCandidates(node, newCandidates);
-			// TODO: ¿Cómo se agregan los nodos a open en DFS?
+
+			open.addAll(newCandidates);
 			break;
 		case IDDFS:
 			if (bestCosts.containsKey(node.getState())) {
@@ -77,9 +88,13 @@ public class GPSEngine {
 			// TODO: ¿Cómo se agregan los nodos a open en IDDFS?
 			break;
 		case GREEDY:
-			newCandidates = new PriorityQueue<>(/* TODO: Comparator! */);
+            if (bestCosts.containsKey(node.getState())) {
+                return;
+            }
+			newCandidates = new ArrayList<>();
 			addCandidates(node, newCandidates);
-			// TODO: ¿Cómo se agregan los nodos a open en GREEDY?
+
+			open.addAll(newCandidates);
 			break;
 		case ASTAR:
 			if (!isBest(node.getState(), node.getCost())) {

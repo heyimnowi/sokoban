@@ -1,6 +1,7 @@
 import gps.GPSEngine;
 import gps.GPSNode;
 import gps.SearchStrategy;
+import model.heuristics.SimpleHeuristic;
 import sokoban.SokobanProblem;
 import sokoban.SokobanState;
 
@@ -8,10 +9,10 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO: get path from args
-        final String path = "res/boards/defaultBoard.txt";
-        final SokobanProblem problem = new SokobanProblem(path);
+        final String path = "res/boards/impossibleBoard.txt";
+        final SokobanProblem problem = new SokobanProblem(path, new SimpleHeuristic());
         // TODO: chose strategy based on args
-        final GPSEngine engine = new GPSEngine(problem, SearchStrategy.BFS);
+        final GPSEngine engine = new GPSEngine(problem, SearchStrategy.DFS);
 
         engine.findSolution();
         if (engine.isFailed()) {

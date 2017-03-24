@@ -5,11 +5,13 @@ import gps.api.GPSRule;
 import gps.api.GPSState;
 import model.Board;
 import model.Position;
+import model.heuristics.Heuristic;
 import utils.BoardReader;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -20,15 +22,17 @@ public class SokobanProblem implements GPSProblem {
     private GPSState initState;
     private Board solutionBoard;
     private GPSState solutionState;
+    private Heuristic heuristic;
 
-    public SokobanProblem(String path) {
+    public SokobanProblem(String path, Heuristic heuristic) {
         try {
             final Board board = BoardReader.fromFile(path);
+
+            this.heuristic = Objects.requireNonNull(heuristic);
+
             initState = new SokobanState(board);
             solutionBoard = board.getSolutionBoard();
             solutionState = new SokobanState(solutionBoard);
-
-            initState.equals(solutionState);
 
             System.out.println("Solution:");
             System.out.println(board.getSolutionBoard() + "\n");
@@ -48,7 +52,6 @@ public class SokobanProblem implements GPSProblem {
         final Set<Position> thisBoxes = solutionBoard.getBoxesPosition();
         final Set<Position> thatBoxes = thatState.getBoard().getBoxesPosition();
 
-
         return thisBoxes.equals(thatBoxes);
     }
 
@@ -59,7 +62,14 @@ public class SokobanProblem implements GPSProblem {
 
     @Override
     public Integer getHValue(GPSState state) {
-        // TODO
-        return null;
+        // TODO: heuristica chota
+        final int boxes = solutionBoard.getBoxesPosition().size();
+        final Board board = ((SokobanState) state).getBoard();
+        final Set<Position> boxesInPlace = board.getBoxesPosition();
+        final int n = (int) boxesInPlace.stream()
+                .filter(position -> board.getCellAt(position).isGoal())
+                .count();
+
+        return boxes - n;
     }
 }
