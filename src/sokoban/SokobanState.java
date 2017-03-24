@@ -1,8 +1,11 @@
 package sokoban;
 
 import gps.api.GPSState;
+import model.Board;
 import model.Position;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -11,23 +14,48 @@ import java.util.Set;
 public class SokobanState implements GPSState {
 
     private int heuristicValue;
-    private Position playerPosition;
-    private Set<Position> boxesPositions;
-    private Set<Position> goalsPositions;
+    private Board board;
 
-    public SokobanState(int heuristicValue, Position playerPosition, Set<Position> boxesPositions, Set<Position> goalsPositions) {
-        this.heuristicValue = heuristicValue;
-        this.playerPosition = playerPosition;
-        this.boxesPositions = boxesPositions;
-        this.goalsPositions = goalsPositions;
+    public SokobanState(final Board board) {
+        this.board = Objects.requireNonNull(board);
+    }
+
+    public Optional<GPSState> apply(SokobanRule rule) {
+        // TODO: This could probably be done after checking if the movement is possible
+        final Board auxBoard = board.duplicate();
+
+        final Optional<Board> nextBoard = auxBoard.move(rule.x, rule.y);
+        if (!nextBoard.isPresent())
+            return Optional.empty();
+
+        final GPSState nextState = new SokobanState(nextBoard.get());
+
+        return Optional.of(nextState);
     }
 
     public int getValue() {
         return this.heuristicValue;
     }
 
-    public Position getPlayerPosition() {
-        return playerPosition;
+    public Board getBoard() {
+        return board;
     }
 
+    // TODO: if the performance is bad, we should consider refactoring this method
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SokobanState that = (SokobanState) o;
+
+        return board.equals(that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return board.hashCode();
+    }
 }

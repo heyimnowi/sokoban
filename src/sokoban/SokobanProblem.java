@@ -1,66 +1,65 @@
 package sokoban;
 
-import model.Cell;
+import gps.api.GPSProblem;
+import gps.api.GPSRule;
+import gps.api.GPSState;
+import model.Board;
 import model.Position;
+import utils.BoardReader;
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
-import java.util.StringTokenizer;
+import java.util.Set;
 
 /**
  * Created by sebastian on 3/22/17.
  */
-public class SokobanProblem {
+public class SokobanProblem implements GPSProblem {
 
+    private GPSState initState;
+    private Board solutionBoard;
+    private GPSState solutionState;
 
-
-    public SokobanProblem() {
-        startProblem();
-    }
-
-    private void startProblem() {
-
-        String sCurrentLine;
-
-        Scanner s;
+    public SokobanProblem(String path) {
         try {
-            s = new Scanner(new File("src/boards/defaultBoard.txt"));
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found");
-            return;
-        }
-        int rows = s.nextInt();
-        int cols = s.nextInt();
-        s.nextLine();
-        Cell[][] map = new Cell[rows][cols];
-        Position playerPosition = null;
-        for (int i = 0; i < rows; i++) {
-            sCurrentLine = s.nextLine();
-            for (int j = 0; j < cols; j++) {
-                char nextChar = sCurrentLine.charAt(j);
-                System.out.print(nextChar);
+            final Board board = BoardReader.fromFile(path);
+            initState = new SokobanState(board);
+            solutionBoard = board.getSolutionBoard();
+            solutionState = new SokobanState(solutionBoard);
 
-                if (nextChar == '^' || nextChar=='+') {
-                    playerPosition = new Position(i, j);
-                }
-                map[i][j] = Cell.getCell(nextChar);
-            }
-            System.out.println();
-        }
-        s.close();
+            initState.equals(solutionState);
 
-        if (playerPosition == null) {
-            System.err.println("Player position not found.");
+            System.out.println("Solution:");
+            System.out.println(board.getSolutionBoard() + "\n");
+        } catch (IOException ex) {
+            // TODO
         }
-        Board.initialBoard(map);
     }
 
-    public static void main(String[] args) {
-        SokobanProblem problem = new SokobanProblem();
+    @Override
+    public GPSState getInitState() {
+        return initState;
+    }
+
+    @Override
+    public boolean isGoal(GPSState state) {
+        final SokobanState thatState = (SokobanState) state;
+        final Set<Position> thisBoxes = solutionBoard.getBoxesPosition();
+        final Set<Position> thatBoxes = thatState.getBoard().getBoxesPosition();
+
+
+        return thisBoxes.equals(thatBoxes);
+    }
+
+    @Override
+    public List<GPSRule> getRules() {
+        return Arrays.asList(SokobanRule.DOWN, SokobanRule.UP, SokobanRule.LEFT, SokobanRule.RIGHT);
+    }
+
+    @Override
+    public Integer getHValue(GPSState state) {
+        // TODO
+        return null;
     }
 }

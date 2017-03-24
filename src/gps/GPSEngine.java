@@ -1,16 +1,11 @@
 package gps;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 import gps.api.GPSProblem;
 import gps.api.GPSRule;
 import gps.api.GPSState;
+import sokoban.SokobanState;
 
 public class GPSEngine {
 
@@ -26,7 +21,7 @@ public class GPSEngine {
 	protected SearchStrategy strategy;
 
 	public GPSEngine(GPSProblem myProblem, SearchStrategy myStrategy) {
-		// TODO: open = *Su queue favorito, TENIENDO EN CUENTA EL ORDEN DE LOS NODOS*
+		open = new LinkedList<>();
 		bestCosts = new HashMap<GPSState, Integer>();
 		problem = myProblem;
 		strategy = myStrategy;
@@ -38,8 +33,8 @@ public class GPSEngine {
 	public void findSolution() {
 		GPSNode rootNode = new GPSNode(problem.getInitState(), 0);
 		open.add(rootNode);
-		// TODO: ¿Lógica de IDDFS?
-		while (open.size() <= 0) {
+        // TODO: ¿Lógica de IDDFS?
+		while (open.size() > 0) {
 			GPSNode currentNode = open.remove();
 			if (problem.isGoal(currentNode.getState())) {
 				finished = true;
@@ -54,7 +49,7 @@ public class GPSEngine {
 	}
 
 	private void explode(GPSNode node) {
-		Collection<GPSNode> newCandidates;
+        Collection<GPSNode> newCandidates;
 		switch (strategy) {
 		case BFS:
 			if (bestCosts.containsKey(node.getState())) {
@@ -62,7 +57,8 @@ public class GPSEngine {
 			}
 			newCandidates = new ArrayList<>();
 			addCandidates(node, newCandidates);
-			// TODO: ¿Cómo se agregan los nodos a open en BFS?
+
+			open.addAll(newCandidates);
 			break;
 		case DFS:
 			if (bestCosts.containsKey(node.getState())) {
