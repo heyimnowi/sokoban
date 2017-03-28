@@ -19,6 +19,13 @@ public class Position {
         return new Position(this.x + x, this.y + y);
     }
 
+    public int distanceTo(final Position position) {
+        final int xdif = this.x - position.x;
+        final int ydif = this.y - position.y;
+
+        return Math.abs(xdif) + Math.abs(ydif);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

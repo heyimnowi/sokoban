@@ -21,7 +21,6 @@ public class SokobanProblem implements GPSProblem {
 
     private GPSState initState;
     private Board solutionBoard;
-    private GPSState solutionState;
     private Heuristic heuristic;
 
     public SokobanProblem(String path, Heuristic heuristic) {
@@ -32,10 +31,6 @@ public class SokobanProblem implements GPSProblem {
 
             initState = new SokobanState(board);
             solutionBoard = board.getSolutionBoard();
-            solutionState = new SokobanState(solutionBoard);
-
-            System.out.println("Solution:");
-            System.out.println(board.getSolutionBoard() + "\n");
         } catch (IOException ex) {
             // TODO
         }
@@ -62,14 +57,6 @@ public class SokobanProblem implements GPSProblem {
 
     @Override
     public Integer getHValue(GPSState state) {
-        // TODO: heuristica chota
-        final int boxes = solutionBoard.getBoxesPosition().size();
-        final Board board = ((SokobanState) state).getBoard();
-        final Set<Position> boxesInPlace = board.getBoxesPosition();
-        final int n = (int) boxesInPlace.stream()
-                .filter(position -> board.getCellAt(position).isGoal())
-                .count();
-
-        return boxes - n;
+        return heuristic.calculate(state);
     }
 }

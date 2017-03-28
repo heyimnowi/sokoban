@@ -1,11 +1,6 @@
-10 10
-wwwwwwwwww
-w^__w____w
-w_*_w__°_w
-www_w____w
-w________w
-w_*______w
-w____w_www
-w_*_w____w
-w_°_w__°_w
-wwwwwwwwww
+12 5
+wwwwwwwwwww
+w°^_______w
+w**wwwwww_w
+w_°_______w
+wwwwwwwwwww

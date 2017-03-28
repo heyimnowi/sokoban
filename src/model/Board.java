@@ -14,6 +14,7 @@ public class Board implements Duplicable<Board> {
     private Cell[][] cells;
     private Position playerPosition;
     private Set<Position> boxesPosition = new HashSet<>();
+    private Set<Position> goalsPosition = new HashSet<>();
     private Board solutionBoard; // lazy initialization
 
     public Board(final Cell[][] cells) {
@@ -29,6 +30,10 @@ public class Board implements Duplicable<Board> {
 
                             if (cell.hasBox()) {
                                 boxesPosition.add(new Position(x, y));
+                            }
+
+                            if (cell.isGoal()) {
+                                goalsPosition.add(new Position(x, y));
                             }
                         })
         );
@@ -157,5 +162,9 @@ public class Board implements Duplicable<Board> {
                 .orElse("")
         ).reduce((s, s2) -> s + "\n" + s2)
                 .orElse("");
+    }
+
+    public Set<Position> getGoalsPosition() {
+        return goalsPosition;
     }
 }
