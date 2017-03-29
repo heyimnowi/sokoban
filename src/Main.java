@@ -1,6 +1,9 @@
 import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
+import gps.SearchStrategy;
+import model.heuristics.NearPBBGHeuristic;
+import model.heuristics.PBBGHeuristic;
 import model.heuristics.PBNearBGHeuristic;
 import sokoban.SokobanProblem;
 import sokoban.SokobanState;
@@ -14,8 +17,7 @@ import exceptions.NonExistingFileException;
 
 public class Main {
 	
-    public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException {
-    	
+    public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException {    	
         try {        
         	getSolution(args[0], args[1]);
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -52,7 +54,6 @@ public class Main {
 	            System.out.println(String.format("Node count: %d", nodeCount));
 	            System.out.println(String.format("Elapsed time: %f ms", (endtime - startTime) / 10E6));
 	        }
-			
 		} catch (StrategyNotFoundException e) {
 			System.out.println("Strategy not found!");
 		} catch (NonExistingFileException e) {
