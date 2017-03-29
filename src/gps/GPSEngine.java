@@ -12,6 +12,7 @@ public class GPSEngine {
 	Map<GPSState, Integer> bestCosts;
 	GPSProblem problem;
 	long explosionCounter;
+	long currentDepth = 0;
 	boolean finished;
 	boolean failed;
 	GPSNode solutionNode;
@@ -26,8 +27,15 @@ public class GPSEngine {
                     return o1.getCost() - o2.getCost();
                 case DFS:
                     return o2.getCost() - o1.getCost();
+                case IDDFS:
+                    return o2.getCost() - o1.getCost();
                 case GREEDY:
                     return myProblem.getHValue(o1.getState()) - myProblem.getHValue(o2.getState());
+                case ASTAR:
+                    final int f1 = o1.getCost() + myProblem.getHValue(o1.getState());
+                    final int f2 = o2.getCost() + myProblem.getHValue(o2.getState());
+
+                    return f1 - f2;
                 default:
                     throw new IllegalArgumentException("Strategy not implemented");
             }
@@ -41,16 +49,21 @@ public class GPSEngine {
 	}
 
 	public void findSolution() {
-		GPSNode rootNode = new GPSNode(problem.getInitState(), 0);
+		GPSNode rootNode = new GPSNode(problem.getInitState(), 0, null);
 		open.add(rootNode);
-        // TODO: ¿Lógica de IDDFS?
 		while (open.size() > 0) {
 			GPSNode currentNode = open.remove();
-			if (problem.isGoal(currentNode.getState())) {
+            boolean iddfsCondition = strategy != SearchStrategy.IDDFS || currentNode.getCost() == currentDepth;
+			if (iddfsCondition && problem.isGoal(currentNode.getState())) {
 				finished = true;
 				solutionNode = currentNode;
 				return;
 			} else {
+                if (currentNode.getCost() == 0) {
+                    currentDepth++;
+                    open.add(currentNode);
+                }
+
 				explode(currentNode);
 			}
 		}
@@ -80,12 +93,12 @@ public class GPSEngine {
 			open.addAll(newCandidates);
 			break;
 		case IDDFS:
-			if (bestCosts.containsKey(node.getState())) {
-				return;
-			}
 			newCandidates = new ArrayList<>();
 			addCandidates(node, newCandidates);
-			// TODO: ¿Cómo se agregan los nodos a open en IDDFS?
+
+			if (currentDepth > node.getCost()) {
+                open.addAll(newCandidates);
+            }
 			break;
 		case GREEDY:
             if (bestCosts.containsKey(node.getState())) {
@@ -102,7 +115,8 @@ public class GPSEngine {
 			}
 			newCandidates = new ArrayList<>();
 			addCandidates(node, newCandidates);
-			// TODO: ¿Cómo se agregan los nodos a open en A*?
+
+			open.addAll(newCandidates);
 			break;
 		}
 	}
@@ -113,7 +127,7 @@ public class GPSEngine {
 		for (GPSRule rule : problem.getRules()) {
 			Optional<GPSState> newState = rule.evalRule(node.getState());
 			if (newState.isPresent()) {
-				GPSNode newNode = new GPSNode(newState.get(), node.getCost() + rule.getCost());
+				GPSNode newNode = new GPSNode(newState.get(), node.getCost() + rule.getCost(), rule);
 				newNode.setParent(node);
 				candidates.add(newNode);
 			}

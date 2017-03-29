@@ -12,10 +12,10 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO: get path from args
-        final String path = "res/boards/complicatedBoard.txt";
-        final SokobanProblem problem = new SokobanProblem(path, new PBNearBGHeuristic());
+        final String path = "res/boards/solutionBoard.txt";
+        final SokobanProblem problem = new SokobanProblem(path, new PBBGHeuristic());
         // TODO: chose strategy based on args
-        final GPSEngine engine = new GPSEngine(problem, SearchStrategy.GREEDY);
+        final GPSEngine engine = new GPSEngine(problem, SearchStrategy.IDDFS);
 
         final long startTime = System.nanoTime();
         engine.findSolution();
