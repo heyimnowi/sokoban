@@ -8,6 +8,7 @@ import java.util.*;
 
 public class GPSEngine {
 
+	private static final long CUT_CONDITION_TIME = 6000000000L; // Five minutes searching the solution
 	Queue<GPSNode> open;
 	Map<GPSState, Integer> bestCosts;
 	GPSProblem problem;
@@ -15,6 +16,7 @@ public class GPSEngine {
 	long currentDepth = 0;
 	boolean finished;
 	boolean failed;
+	boolean timeOut;
 	GPSNode solutionNode;
 
 	// Use this variable in open set order.
@@ -48,14 +50,19 @@ public class GPSEngine {
 		failed = false;
 	}
 
-	public void findSolution() {
+	public void findSolution(long startTime) {
 		GPSNode rootNode = new GPSNode(problem.getInitState(), 0, null);
 		open.add(rootNode);
-		while (open.size() > 0) {
+		timeOut = false;
+		while (open.size() > 0 && !timeOut) {
 			GPSNode currentNode = open.remove();
 			boolean isIDDFS = strategy == SearchStrategy.IDDFS;
             boolean iddfsCondition =  !isIDDFS || currentNode.getCost() == currentDepth;
 
+			if (System.nanoTime() - startTime > CUT_CONDITION_TIME) {
+				timeOut = true;
+			}
+            boolean iddfsCondition = strategy != SearchStrategy.IDDFS || currentNode.getCost() == currentDepth;
 			if (iddfsCondition && problem.isGoal(currentNode.getState())) {
 				finished = true;
 				solutionNode = currentNode;
@@ -69,7 +76,9 @@ public class GPSEngine {
 				explode(currentNode);
 			}
 		}
-		failed = true;
+		if (!timeOut) {
+			failed = true;
+		}
 		finished = true;
 	}
 
@@ -168,6 +177,10 @@ public class GPSEngine {
 
 	public boolean isFailed() {
 		return failed;
+	}
+
+	public boolean isTimeOut() {
+		return timeOut;
 	}
 
 	public GPSNode getSolutionNode() {
