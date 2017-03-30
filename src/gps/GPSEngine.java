@@ -8,7 +8,7 @@ import java.util.*;
 
 public class GPSEngine {
 
-	private static final long CUT_CONDITION_TIME = 60000000000L; // Five minutes searching the solution
+	private static final long CUT_CONDITION_TIME = 6000000000L; // Five minutes searching the solution
 	Queue<GPSNode> open;
 	Map<GPSState, Integer> bestCosts;
 	GPSProblem problem;

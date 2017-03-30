@@ -55,20 +55,24 @@ public class Metrics {
 	public static void printMetrics(List<String> boardArray, List<SearchStrategy> strategyArray) throws FileNotFoundException {
 		try {
 			long startTime;
-			for (String fileName : boardArray) {
+			for (String boardName : boardArray) {
 				for (SearchStrategy searchStrategy: strategyArray) {
-					sb.append(fileName + "," + searchStrategy);
+					sb.append(boardName + "," + searchStrategy.toString());
 					startTime = System.nanoTime();
-					final SokobanProblem problem = new SokobanProblem(ArgsReader.getFilePath(fileName), new PBNearBGHeuristic());
+					final SokobanProblem problem = new SokobanProblem(ArgsReader.getFilePath(boardName), new PBNearBGHeuristic());
 			    	final GPSEngine engine = new GPSEngine(problem, searchStrategy);
 			    	startTime = System.nanoTime();
 			        engine.findSolution(startTime);
 			        final long endtime = System.nanoTime();
 			        
-			        if (engine.isFailed() || !engine.isTimeOut()) {
-			            sb.append(",-,-\n");
+			        if (engine.isFailed()) {
+			            sb.append(",-1,-1\n");
 			        }
 
+			        if (engine.isTimeOut()) {
+			            sb.append(",-,-\n");
+			        }
+			        
 			        if (engine.isFinished() && !engine.isFailed() && !engine.isTimeOut()) {
 			            GPSNode solutionNode = engine.getSolutionNode();;
 			            int nodeCount = 0;
