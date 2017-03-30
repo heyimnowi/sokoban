@@ -53,13 +53,15 @@ public class GPSEngine {
 		open.add(rootNode);
 		while (open.size() > 0) {
 			GPSNode currentNode = open.remove();
-            boolean iddfsCondition = strategy != SearchStrategy.IDDFS || currentNode.getCost() == currentDepth;
+			boolean isIDDFS = strategy == SearchStrategy.IDDFS;
+            boolean iddfsCondition =  !isIDDFS || currentNode.getCost() == currentDepth;
+
 			if (iddfsCondition && problem.isGoal(currentNode.getState())) {
 				finished = true;
 				solutionNode = currentNode;
 				return;
 			} else {
-                if (currentNode.getCost() == 0) {
+                if (isIDDFS && currentNode.getCost() == 0) {
                     currentDepth++;
                     open.add(currentNode);
                 }
