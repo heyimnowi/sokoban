@@ -1,28 +1,42 @@
 import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
-import gps.SearchStrategy;
-import model.heuristics.NearPBBGHeuristic;
-import model.heuristics.PBBGHeuristic;
 import model.heuristics.PBNearBGHeuristic;
 import sokoban.SokobanProblem;
 import sokoban.SokobanState;
 import utils.ArgsReader;
 import utils.Metrics;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 import exceptions.NonExistingFileException;
 
 public class Main {
-	
-    public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException {    	
-        try {
-        	getSolution(args[0], args[1]);
-		} catch (ArrayIndexOutOfBoundsException e) {
-			Metrics.getMetrics();
-		}
+
+	public static Properties properties;
+	public static File file;
+
+    public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException, FileNotFoundException {    	
+    	
+    	try {
+    		properties = getProperties();
+    		String board = properties.getProperty("board");
+    		String strategy = properties.getProperty("strategy");
+    		if (board != null && !board.isEmpty() && !strategy.isEmpty() && strategy != null) {
+    			getSolution(board, strategy);
+    		} else {
+    			Metrics.getMetrics(board, strategy);
+    		}
+		} catch (IOException e) {
+			System.out.println("Cant read config.properties");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Ups!");
+		}	
     }
 
 	private static void getSolution(String fileName, String strategy) {
@@ -38,7 +52,11 @@ public class Main {
 	            System.out.println("No solution found");
 	        }
 
-	        if (engine.isFinished() && !engine.isFailed()) {
+	        if (engine.isTimeOut()) {
+	            System.out.println("Time out");
+	        }
+
+	        if (engine.isFinished() && !engine.isFailed() && !engine.isTimeOut()) {
 	            GPSNode solutionNode = engine.getSolutionNode();;
 	            SokobanState solutionState;
 	            int nodeCount = 0;
@@ -60,6 +78,16 @@ public class Main {
 		} catch (NonExistingFileException e) {
 			System.out.println("File not found!");
 		}
+	}
+	
+	private static Properties getProperties() throws IOException {
+		Properties properties = new Properties();
+		String current = new java.io.File(".").getCanonicalPath();
+		file = new File(current + "/res/config.properties");
+		//file = new File("./config.properties");
+		FileInputStream fis = new FileInputStream(file);
+		properties.load(fis);
+		return properties;
 	}
 
 }

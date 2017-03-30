@@ -9,7 +9,7 @@ import gps.SearchStrategy;
 public class ArgsReader {
 	
 	public static String getFilePath(String nameFile) throws NonExistingFileException {
-		String path = "res/boards/" + nameFile + ".txt";
+		String path = "res/boards/" + nameFile;
 		File f = new File(path);
 		if(f.exists() && !f.isDirectory()) { 
 			return path;
