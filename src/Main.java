@@ -18,7 +18,7 @@ import exceptions.NonExistingFileException;
 public class Main {
 	
     public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException {    	
-        try {        
+        try {
         	getSolution(args[0], args[1]);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			Metrics.getMetrics();
@@ -31,8 +31,9 @@ public class Main {
 	    	final SokobanProblem problem = new SokobanProblem(path, new PBNearBGHeuristic());
 	    	final GPSEngine engine = new GPSEngine(problem, ArgsReader.getStrategy(strategy));
 	    	final long startTime = System.nanoTime();
-	        engine.findSolution();
+	        engine.findSolution(startTime);
 	        final long endtime = System.nanoTime();
+
 	        if (engine.isFailed()) {
 	            System.out.println("No solution found");
 	        }

@@ -15,6 +15,7 @@ public class Metrics {
 		
 	
 	public static void getMetrics() {
+		long startTime;
 		filesArray = new ArrayList<String>();
 		filesArray.add("complicated2Board");
 		filesArray.add("complicatedBoard");
@@ -27,19 +28,19 @@ public class Metrics {
 		System.out.print(",Strategy");
 		System.out.print(",Node count");
 		System.out.println(",Elapsed time [ms]");
+		
 		for (String fileName : filesArray) {
-			System.out.print(fileName);
 			for (SearchStrategy strategy: SearchStrategy.values()) {
-				System.out.print("," + strategy);
-		    	
+				System.out.print(fileName + "," + strategy);
+				startTime = System.nanoTime();
 				final SokobanProblem problem = new SokobanProblem("res/boards/" + fileName + ".txt", new PBNearBGHeuristic());
 		    	final GPSEngine engine = new GPSEngine(problem, strategy);
-		    	final long startTime = System.nanoTime();
-		        engine.findSolution();
+		    	startTime = System.nanoTime();
+		        engine.findSolution(startTime);
 		        final long endtime = System.nanoTime();
 		        
 		        if (engine.isFailed()) {
-		            System.out.print(",-");
+		            System.out.println(",-,-");
 		        }
 
 		        if (engine.isFinished() && !engine.isFailed()) {
@@ -49,7 +50,7 @@ public class Metrics {
 		                nodeCount++;
 		                solutionNode = solutionNode.getParent();
 		            } while (solutionNode != null);
-		            System.out.println(String.format(",%d", nodeCount));
+		            System.out.print(String.format(",%d", nodeCount));
 		            System.out.println(String.format(",%f", (endtime - startTime) / 10E6));
 		        }
 			}

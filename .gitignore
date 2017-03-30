@@ -2,7 +2,8 @@
 .classpath
 .settings/*
 .DS_Store
-
+.project
 .idea/
 out
+/bin/
 /bin/

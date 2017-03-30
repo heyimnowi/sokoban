@@ -8,6 +8,7 @@ import java.util.*;
 
 public class GPSEngine {
 
+	private static final long CUT_CONDITION_TIME = 300000000000L; // Five minutes searching the solution
 	Queue<GPSNode> open;
 	Map<GPSState, Integer> bestCosts;
 	GPSProblem problem;
@@ -48,11 +49,15 @@ public class GPSEngine {
 		failed = false;
 	}
 
-	public void findSolution() {
+	public void findSolution(long startTime) {
 		GPSNode rootNode = new GPSNode(problem.getInitState(), 0, null);
 		open.add(rootNode);
-		while (open.size() > 0) {
+		boolean cutCondition = false;
+		while (open.size() > 0 && !cutCondition) {
 			GPSNode currentNode = open.remove();
+			if (System.nanoTime() - startTime > CUT_CONDITION_TIME) {
+				cutCondition = true;
+			}
             boolean iddfsCondition = strategy != SearchStrategy.IDDFS || currentNode.getCost() == currentDepth;
 			if (iddfsCondition && problem.isGoal(currentNode.getState())) {
 				finished = true;
