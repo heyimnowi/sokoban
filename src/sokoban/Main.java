@@ -20,18 +20,27 @@ import exceptions.NonExistingFileException;
 
 public class Main {
 
-    private static final int CUT_CONDITION_TIME = 1; // Five minutes searching the solution
+    private static final int CUT_CONDITION_TIME = 5;
 
     public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException, FileNotFoundException {
     	try {
             final Properties properties = getProperties();
     		final String board = properties.getProperty("board");
     		final String strategy = properties.getProperty("strategy");
-
+    		final String iterationsString = properties.getProperty("iterations");
+    		int iterations = 1;
+    		
+    		if (!iterationsString.isEmpty() && iterationsString != null) {
+    			iterations = Integer.valueOf(iterationsString);
+    		}
+    		
     		if (board != null && !board.isEmpty() && strategy != null && !strategy.isEmpty()) {
     			getSolution(board, strategy);
     		} else {
-    			Metrics.getMetrics(board, strategy);
+    			if (iterations == 0) {
+    				iterations = 1;
+    			}
+    			Metrics.getMetrics(board, strategy, iterations);
     		}
 		} catch (IOException e) {
 			System.out.println("Cant read config.properties");
