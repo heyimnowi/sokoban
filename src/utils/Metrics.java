@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import javax.swing.text.DefaultStyledDocument.ElementSpec;
-
 public class Metrics {
 	
 	private static List<String> boardArray;
@@ -35,7 +33,6 @@ public class Metrics {
 		
 		boardArray = new ArrayList<>();
 		strategyArray = new ArrayList<>();
-		average = new HashMap<>();
 
 		if (board == null || board.isEmpty()){
 			boardArray = FileScanner.listFiles("res/boards");
@@ -48,17 +45,18 @@ public class Metrics {
 		} else {		
 			strategyArray.add(SearchStrategy.valueOf(strategy.toUpperCase()));
 		}
-		
+		average = new HashMap<>();
+
 		for (int i = 0; i < iterations; i++) {
 			System.out.println("Iteration #" + (i+1));
-			printHeaders();
+			printHeaders(i+1);
 			printMetrics(boardArray, strategyArray);
 		}
 		printAverage(iterations);
 	}
 	
 	private static void printAverage(int iterations) throws FileNotFoundException {
-		PrintWriter averagePrinter = new PrintWriter(new File("average" + System.nanoTime() + ".csv"));
+		PrintWriter averagePrinter = new PrintWriter(new File("average.csv"));
 		StringBuilder sba = new StringBuilder();
 		sba.append("Board").append(",Strategy").append(",Elapsed time [ms]\n");
 		for (String boardName : average.keySet()) {
@@ -66,8 +64,10 @@ public class Metrics {
 				int elapsedTime = 0;
 				for (BoardResults boardResult : average.get(boardName).get(strategy)) {
 					elapsedTime += boardResult.getElapsedTime();
+					System.out.println("un result " + boardResult.getElapsedTime());
 				}
 				elapsedTime = elapsedTime / iterations;
+				System.out.println("Elapsed time del board average:" + elapsedTime);
 				sba.append(boardName).append(",").append(strategy.toString()).append(",").append(String.format("%f\n", elapsedTime / 10E6)).append('\n');
 			}
 		}	
@@ -76,8 +76,8 @@ public class Metrics {
         System.out.println("Average printed");
 	}
 
-	private static void printHeaders() throws FileNotFoundException {
-		pw = new PrintWriter(new File("test" + System.nanoTime() + ".csv"));
+	private static void printHeaders(int iteration) throws FileNotFoundException {
+		pw = new PrintWriter(new File("test_" + iteration + ".csv"));
 		sb = new StringBuilder();
 		sb.append("Board").append(",Strategy").append(",Distance").append(",Elapsed time [ms]\n");
 	}
@@ -90,6 +90,7 @@ public class Metrics {
 					average.put(boardName, new HashMap<>());
 				}
 				for (SearchStrategy searchStrategy: strategyArray) {
+					System.out.println(average);
 					if (!average.get(boardName).containsKey(searchStrategy)) {
 						average.get(boardName).put(searchStrategy, new HashSet<>());
 					}

@@ -20,7 +20,7 @@ import exceptions.NonExistingFileException;
 
 public class Main {
 
-    private static final int CUT_CONDITION_TIME = 5;
+    private static final int CUT_CONDITION_TIME = 1;
 
     public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException, FileNotFoundException {
     	try {
