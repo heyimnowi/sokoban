@@ -1,18 +1,21 @@
 package utils;
 
+import exceptions.NonExistingFileException;
+import gps.GPSEngine;
+import gps.GPSNode;
+import gps.SearchStrategy;
+import model.heuristics.PBNearBGHeuristic;
+import sokoban.Main;
+import sokoban.SokobanProblem;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import exceptions.NonExistingFileException;
-import gps.GPSEngine;
-import gps.GPSNode;
-import gps.SearchStrategy;
-import model.heuristics.PBNearBGHeuristic;
-import sokoban.SokobanProblem;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class Metrics {
 	
@@ -24,10 +27,9 @@ public class Metrics {
 	public static void getMetrics(String board, String strategy) throws FileNotFoundException {
 		printHeaders();
 		
-		boardArray = new ArrayList<String>();
-		strategyArray = new ArrayList<SearchStrategy>();
+		boardArray = new ArrayList<>();
+		strategyArray = new ArrayList<>();
 
-		
 		if (board == null || board.isEmpty()){
 			boardArray = FileScanner.listFiles("res/boards");
 		} else {
@@ -46,43 +48,43 @@ public class Metrics {
 	private static void printHeaders() throws FileNotFoundException {
 		pw = new PrintWriter(new File("test" + System.nanoTime() + ".csv"));
 		sb = new StringBuilder();
-		sb.append("Board");
-		sb.append(",Strategy");
-		sb.append(",Distance");
-		sb.append(",Elapsed time [ms]\n");	
+		sb.append("Board").append(",Strategy").append(",Distance").append(",Elapsed time [ms]\n");
 	}
 
 	public static void printMetrics(List<String> boardArray, List<SearchStrategy> strategyArray) throws FileNotFoundException {
 		try {
-			long startTime;
 			for (String boardName : boardArray) {
 				for (SearchStrategy searchStrategy: strategyArray) {
-					sb.append(boardName + "," + searchStrategy.toString());
-					startTime = System.nanoTime();
-					final SokobanProblem problem = new SokobanProblem(ArgsReader.getFilePath(boardName), new PBNearBGHeuristic());
+                    System.out.println(String.format("Solving %s with %s", boardName, searchStrategy));
+                    final SokobanProblem problem = new SokobanProblem(ArgsReader.getFilePath(boardName), new PBNearBGHeuristic());
 			    	final GPSEngine engine = new GPSEngine(problem, searchStrategy);
-			    	startTime = System.nanoTime();
-			        engine.findSolution(startTime);
-			        final long endtime = System.nanoTime();
-			        
-			        if (engine.isFailed()) {
-			            sb.append(",-1,-1\n");
-			        }
 
-			        if (engine.isTimeOut()) {
-			            sb.append(",-,-\n");
-			        }
-			        
-			        if (engine.isFinished() && !engine.isFailed() && !engine.isTimeOut()) {
-			            GPSNode solutionNode = engine.getSolutionNode();;
-			            int nodeCount = 0;
-			            do {
-			                nodeCount++;
-			                solutionNode = solutionNode.getParent();
-			            } while (solutionNode != null);
-			            sb.append(String.format(",%d", nodeCount));
-			            sb.append(String.format(",%f", (endtime - startTime) / 10E6) + '\n');
-			        }
+                    sb.append(boardName).append(",").append(searchStrategy.toString());
+
+			    	try {
+						final long elapsedTime = Main.findSolution(engine);
+
+						if (engine.isFailed()) {
+							sb.append(",-1,-1\n");
+						}
+
+						if (engine.isFinished() && !engine.isFailed()) {
+							GPSNode solutionNode = engine.getSolutionNode();;
+							int nodeCount = 0;
+
+							do {
+								nodeCount++;
+								solutionNode = solutionNode.getParent();
+							} while (solutionNode != null);
+
+							sb.append(String.format(",%d", nodeCount));
+							sb.append(String.format(",%f\n", elapsedTime / 10E6));
+						}
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					} catch (TimeoutException e) {
+						sb.append(",-,-\n");
+					}
 				}
 			}
 	        pw.write(sb.toString());

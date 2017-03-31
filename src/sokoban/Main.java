@@ -1,3 +1,5 @@
+package sokoban;
+
 import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
@@ -12,21 +14,21 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.*;
 
 import exceptions.NonExistingFileException;
 
 public class Main {
 
-	public static Properties properties;
-	public static File file;
+    private static final int CUT_CONDITION_TIME = 1; // Five minutes searching the solution
 
-    public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException, FileNotFoundException {    	
-    	
+    public static void main(String[] args) throws StrategyNotFoundException, NonExistingFileException, FileNotFoundException {
     	try {
-    		properties = getProperties();
-    		String board = properties.getProperty("board");
-    		String strategy = properties.getProperty("strategy");
-    		if (board != null && !board.isEmpty() && !strategy.isEmpty() && strategy != null) {
+            final Properties properties = getProperties();
+    		final String board = properties.getProperty("board");
+    		final String strategy = properties.getProperty("strategy");
+
+    		if (board != null && !board.isEmpty() && strategy != null && !strategy.isEmpty()) {
     			getSolution(board, strategy);
     		} else {
     			Metrics.getMetrics(board, strategy);
@@ -44,19 +46,13 @@ public class Main {
 			final String path = ArgsReader.getFilePath(fileName);
 	    	final SokobanProblem problem = new SokobanProblem(path, new PBNearBGHeuristic());
 	    	final GPSEngine engine = new GPSEngine(problem, ArgsReader.getStrategy(strategy));
-	    	final long startTime = System.nanoTime();
-	        engine.findSolution(startTime);
-	        final long endtime = System.nanoTime();
+            final long elapsedTime = findSolution(engine);
 
 	        if (engine.isFailed()) {
 	            System.out.println("No solution found");
 	        }
 
-	        if (engine.isTimeOut()) {
-	            System.out.println("Time out");
-	        }
-
-	        if (engine.isFinished() && !engine.isFailed() && !engine.isTimeOut()) {
+	        if (engine.isFinished() && !engine.isFailed()) {
 	            GPSNode solutionNode = engine.getSolutionNode();;
 	            SokobanState solutionState;
 	            int nodeCount = 0;
@@ -71,23 +67,41 @@ public class Main {
 	            } while (solutionNode != null);
 
 	            System.out.println(String.format("Node count: %d", nodeCount));
-	            System.out.println(String.format("Elapsed time: %f ms", (endtime - startTime) / 10E6));
+	            System.out.println(String.format("Elapsed time: %f ms", elapsedTime / 10E6));
 	        }
 		} catch (StrategyNotFoundException e) {
 			System.out.println("Strategy not found!");
 		} catch (NonExistingFileException e) {
 			System.out.println("File not found!");
-		}
-	}
+		} catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            System.out.println("Time out");
+        }
+    }
 	
 	private static Properties getProperties() throws IOException {
-		Properties properties = new Properties();
-		String current = new java.io.File(".").getCanonicalPath();
-		file = new File(current + "/res/config.properties");
+		final Properties properties = new Properties();
+		final String current = new java.io.File(".").getCanonicalPath();
+        final File file = new File(current + "/res/config.properties");
 		//file = new File("./config.properties");
-		FileInputStream fis = new FileInputStream(file);
+		final FileInputStream fis = new FileInputStream(file);
+
 		properties.load(fis);
+
 		return properties;
 	}
+
+	public static long findSolution(final GPSEngine engine) throws InterruptedException, ExecutionException, TimeoutException {
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final Future<?> future = service.submit(engine::findSolution);
+        final long startTime = System.nanoTime(); // It should go before future.get(...) but it's prettier like this :)
+
+        service.shutdown();
+        future.get(CUT_CONDITION_TIME, TimeUnit.MINUTES);
+        service.shutdownNow();
+
+        return System.nanoTime() - startTime;
+    }
 
 }
