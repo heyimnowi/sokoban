@@ -56,7 +56,7 @@ public class Metrics {
 	}
 	
 	private static void printAverage(int iterations) throws FileNotFoundException {
-		PrintWriter averagePrinter = new PrintWriter(new File("average_simple_heristic.csv"));
+		PrintWriter averagePrinter = new PrintWriter(new File("averagePBNearBGHeuristic.csv"));
 		StringBuilder sba = new StringBuilder();
 		sba.append("Board").append(",Strategy").append(",Elapsed time [ms]\n");
 		for (String boardName : average.keySet()) {
@@ -64,12 +64,10 @@ public class Metrics {
 				int elapsedTime = 0;
 				for (BoardResults boardResult : average.get(boardName).get(strategy)) {
 					elapsedTime += boardResult.getElapsedTime();
-					System.out.println("un result " + boardResult.getElapsedTime());
 				}
 				if (average.get(boardName).get(strategy).size() != 0) {
 					elapsedTime = elapsedTime / average.get(boardName).get(strategy).size();
 				}
-				System.out.println("Elapsed time del board average:" + elapsedTime);
 				sba.append(boardName).append(",").append(strategy.toString()).append(",").append(String.format("%f", elapsedTime / 10E6)).append('\n');
 			}
 		}	
@@ -79,7 +77,7 @@ public class Metrics {
 	}
 
 	private static void printHeaders(int iteration) throws FileNotFoundException {
-		pw = new PrintWriter(new File("test_" + iteration + "_simple_heristic.csv"));
+		pw = new PrintWriter(new File("test_" + iteration + "PBNearBGHeuristic.csv"));
 		sb = new StringBuilder();
 		sb.append("Board").append(",Strategy").append(",Distance").append(",Elapsed time [ms]\n");
 	}
@@ -95,7 +93,6 @@ public class Metrics {
 					if (!average.get(boardName).containsKey(searchStrategy)) {
 						average.get(boardName).put(searchStrategy, new HashSet<>());
 					}
-                    System.out.println(String.format("Solving %s with %s", boardName, searchStrategy));
                     final SokobanProblem problem = new SokobanProblem(ArgsReader.getFilePath(boardName), new PBNearBGHeuristic());
 			    	final GPSEngine engine = new GPSEngine(problem, searchStrategy);
 
