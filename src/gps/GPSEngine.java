@@ -4,12 +4,23 @@ import gps.api.GPSProblem;
 import gps.api.GPSRule;
 import gps.api.GPSState;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+
+import sokoban.SokobanState;
 
 public class GPSEngine {
 
 	Queue<GPSNode> open;
 	Map<GPSState, Integer> bestCosts;
+	Set<GPSState> roundStates;
 	GPSProblem problem;
 	long explosionCounter;
 	long currentDepth = 0;
@@ -41,6 +52,7 @@ public class GPSEngine {
             }
         });
 		bestCosts = new HashMap<>();
+		roundStates = new HashSet<>();
 		problem = myProblem;
 		strategy = myStrategy;
 		explosionCounter = 0;
@@ -55,13 +67,13 @@ public class GPSEngine {
 			GPSNode currentNode = open.remove();
 			boolean isIDDFS = strategy == SearchStrategy.IDDFS;
             boolean iddfsCondition =  !isIDDFS || currentNode.getCost() == currentDepth;
-
 			if (iddfsCondition && problem.isGoal(currentNode.getState())) {
 				finished = true;
 				solutionNode = currentNode;
 				return;
 			} else {
                 if (isIDDFS && currentNode.getCost() == 0) {
+                	roundStates = new HashSet<>();
                     currentDepth++;
                     open.add(currentNode);
                 }
@@ -95,6 +107,13 @@ public class GPSEngine {
 			open.addAll(newCandidates);
 			break;
 		case IDDFS:
+			if (roundStates.contains(node.getState())) {
+				return;
+			}
+			if (!isBestOrSame(node.getState(), node.getCost())) {
+				return;
+			}
+			roundStates.add(node.getState());
 			newCandidates = new ArrayList<>();
 			addCandidates(node, newCandidates);
 
@@ -138,6 +157,10 @@ public class GPSEngine {
 
 	private boolean isBest(GPSState state, Integer cost) {
 		return !bestCosts.containsKey(state) || cost < bestCosts.get(state);
+	}
+	
+	private boolean isBestOrSame(GPSState state, Integer cost) {
+		return !bestCosts.containsKey(state) || cost <= bestCosts.get(state);
 	}
 
 	private void updateBest(GPSNode node) {

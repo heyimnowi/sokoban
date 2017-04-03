@@ -4,6 +4,7 @@ import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
 import model.heuristics.NearPBBGHeuristic;
+import model.heuristics.PBBGHeuristic;
 import model.heuristics.PBNearBGHeuristic;
 import model.heuristics.SimpleHeuristic;
 import sokoban.SokobanProblem;
@@ -78,7 +79,7 @@ public class Main {
 	            } while (solutionNode != null);
 
 	            System.out.println(String.format("Node count: %d", nodeCount));
-	            System.out.println(String.format("Elapsed time: %f ms", elapsedTime / 10E6));
+	            System.out.println(String.format("Elapsed time: %f ms", elapsedTime / 1E6));
 	        }
 		} catch (StrategyNotFoundException e) {
 			System.out.println("Strategy not found!");
