@@ -56,7 +56,7 @@ public class Metrics {
 	}
 	
 	private static void printAverage(int iterations) throws FileNotFoundException {
-		PrintWriter averagePrinter = new PrintWriter(new File("average.csv"));
+		PrintWriter averagePrinter = new PrintWriter(new File("average_simple_heristic.csv"));
 		StringBuilder sba = new StringBuilder();
 		sba.append("Board").append(",Strategy").append(",Elapsed time [ms]\n");
 		for (String boardName : average.keySet()) {
@@ -66,9 +66,11 @@ public class Metrics {
 					elapsedTime += boardResult.getElapsedTime();
 					System.out.println("un result " + boardResult.getElapsedTime());
 				}
-				elapsedTime = elapsedTime / iterations;
+				if (average.get(boardName).get(strategy).size() != 0) {
+					elapsedTime = elapsedTime / average.get(boardName).get(strategy).size();
+				}
 				System.out.println("Elapsed time del board average:" + elapsedTime);
-				sba.append(boardName).append(",").append(strategy.toString()).append(",").append(String.format("%f\n", elapsedTime / 10E6)).append('\n');
+				sba.append(boardName).append(",").append(strategy.toString()).append(",").append(String.format("%f", elapsedTime / 10E6)).append('\n');
 			}
 		}	
         averagePrinter.write(sba.toString());
@@ -77,7 +79,7 @@ public class Metrics {
 	}
 
 	private static void printHeaders(int iteration) throws FileNotFoundException {
-		pw = new PrintWriter(new File("test_" + iteration + ".csv"));
+		pw = new PrintWriter(new File("test_" + iteration + "_simple_heristic.csv"));
 		sb = new StringBuilder();
 		sb.append("Board").append(",Strategy").append(",Distance").append(",Elapsed time [ms]\n");
 	}
@@ -90,7 +92,6 @@ public class Metrics {
 					average.put(boardName, new HashMap<>());
 				}
 				for (SearchStrategy searchStrategy: strategyArray) {
-					System.out.println(average);
 					if (!average.get(boardName).containsKey(searchStrategy)) {
 						average.get(boardName).put(searchStrategy, new HashSet<>());
 					}
