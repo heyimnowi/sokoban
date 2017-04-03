@@ -56,7 +56,7 @@ public class Metrics {
 	}
 	
 	private static void printAverage(int iterations) throws FileNotFoundException {
-		PrintWriter averagePrinter = new PrintWriter(new File("average_simple_heristic.csv"));
+		PrintWriter averagePrinter = new PrintWriter(new File("average_nearPBBG_heuristic.csv"));
 		StringBuilder sba = new StringBuilder();
 		sba.append("Board").append(",Strategy").append(",Elapsed time [ms]\n");
 		for (String boardName : average.keySet()) {

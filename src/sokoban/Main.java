@@ -3,6 +3,7 @@ package sokoban;
 import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
+import model.heuristics.NearPBBGHeuristic;
 import model.heuristics.PBNearBGHeuristic;
 import model.heuristics.SimpleHeuristic;
 import sokoban.SokobanProblem;
@@ -54,7 +55,7 @@ public class Main {
 	private static void getSolution(String fileName, String strategy) {
 		try {
 			final String path = ArgsReader.getFilePath(fileName);
-	    	final SokobanProblem problem = new SokobanProblem(path, new SimpleHeuristic());
+	    	final SokobanProblem problem = new SokobanProblem(path, new NearPBBGHeuristic());
 	    	final GPSEngine engine = new GPSEngine(problem, ArgsReader.getStrategy(strategy));
             final long elapsedTime = findSolution(engine);
 
