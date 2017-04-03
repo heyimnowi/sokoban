@@ -8,9 +8,6 @@ import sokoban.SokobanState;
 import java.util.Comparator;
 import java.util.Set;
 
-/**
- * Created by jsuarezb on 27/03/17.
- */
 public class PBNearBGHeuristic implements Heuristic {
 
     @Override

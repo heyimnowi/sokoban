@@ -4,7 +4,6 @@ import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
 import model.heuristics.NearPBBGHeuristic;
-import model.heuristics.PBBGHeuristic;
 import model.heuristics.PBNearBGHeuristic;
 import model.heuristics.SimpleHeuristic;
 import sokoban.SokobanProblem;

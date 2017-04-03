@@ -35,7 +35,7 @@ public interface Cell extends Duplicable<Cell> {
                 return new EmptyCell(false, true);
             case '^':
                 return new EmptyCell(true, false);
-            case 'Â°':
+            case '°':
                 return new GoalCell(false, false);
             case 'O':
                 return new GoalCell(false, true);
