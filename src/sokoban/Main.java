@@ -73,13 +73,13 @@ public class Main {
 
 	                System.out.println(solutionState.getBoard() + "\n");
 	                System.out.println(String.format("Heuristic value: %d", problem.getHValue(solutionState)));
-					// TODO: Remove this log
-					System.out.println("open --> " + engine.getOpen().size());
 	                solutionNode = solutionNode.getParent();
 	            } while (solutionNode != null);
 
+				System.out.println("-------------------------");
 	            System.out.println(String.format("Steps to solution: %d", nodeCount));
 				System.out.println(String.format("Expanded nodes: %d", engine.getExplosionCounter()));
+				System.out.println(String.format("Border nodes: %d", engine.getOpen().size()));
 				System.out.println(String.format("Elapsed time: %f ms", elapsedTime / 1E6));
 	        }
 		} catch (StrategyNotFoundException e) {
