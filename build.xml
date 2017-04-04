@@ -1,0 +1,1 @@
+<project name="sia" default="Jar"><target name="Compile"><mkdir dir="bin"/><javac srcdir="src" destdir="bin"/></target><target name="Jar" depends="Compile"><jar destfile="sokoban.jar" basedir="bin"><manifest><attribute name="Main-Class" value="sokoban.Main"/></manifest></jar></target></project>
