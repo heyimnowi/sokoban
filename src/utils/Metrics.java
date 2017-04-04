@@ -1,6 +1,8 @@
 package utils;
 
+import exceptions.HeuristicNotFoundException;
 import exceptions.NonExistingFileException;
+import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
 import gps.SearchStrategy;
@@ -28,73 +30,76 @@ public class Metrics {
 	
 	private static List<String> boardArray;
 	private static List<SearchStrategy> strategyArray;
-	private static PrintWriter pw;
-	private static StringBuilder sb;
+	private static List<Heuristic> heuristicArray;
+	private static PrintWriter testPrintWriter;
+	private static StringBuilder testStringBuilder;
 	private static Map<String, Map<SearchStrategy, Set<BoardResults>>> average;
-
-	private static Heuristic heuristic;
-	private static String heuristicFile;
 	
-	public static void getMetrics(String board, String strategy, int iterations) throws FileNotFoundException {
+	public static void getMetrics(String board, String strategy, String heuristic, int iterations) throws FileNotFoundException {
 		
 		boardArray = new ArrayList<>();
 		strategyArray = new ArrayList<>();
-
-		if (board == null || board.isEmpty()){
-			boardArray = FileScanner.listFiles("res/boards");
-		} else {
-			boardArray.add(board);
-		}
-		
-		if (strategy == null || strategy.isEmpty()) {
-			strategyArray = Arrays.asList(SearchStrategy.values());
-		} else {		
-			strategyArray.add(SearchStrategy.valueOf(strategy.toUpperCase()));
-		}
+		heuristicArray = new ArrayList<>();
 		average = new HashMap<>();
-
-		for (int j = 0; j < 3; j++) {
-			heuristic = getHeuristic(j);
-			System.out.println("heur num: " + j);
+		
+		try {
+			getParams(board, strategy, heuristic);
+			
 			for (int i = 0; i < iterations; i++) {
 				System.out.println("Iteration #" + (i+1));
 				printHeaders(i+1);
-				printMetrics(boardArray, strategyArray);
+				printMetrics(boardArray, strategyArray, heuristicArray);
+				testPrintWriter.write(testStringBuilder.toString());
+				testPrintWriter.close();
+				System.out.println("CSV Printed");
 			}
+			printAverage(iterations);
+		} catch (NonExistingFileException e) {
+			System.out.println("Board not found!");
+		} catch (StrategyNotFoundException e) {
+			System.out.println("Strategy not found!");
+		} catch (HeuristicNotFoundException e) {
+			System.out.println("Heuristic not found!");
+		} catch (Exception e) {
+			System.out.println("Ups!");
+		}
+	}
+	
+	private static void getParams(String board, String strategy, String heuristic) throws NonExistingFileException, StrategyNotFoundException, HeuristicNotFoundException {
+		if (board == null || board.isEmpty()){
+			boardArray = FileScanner.listFiles("res/boards");
+		} else {
+			boardArray.add(ArgsReader.getFilePath(board));
 		}
 
-		printAverage(iterations);
-	}
-	
-	private static Heuristic getHeuristic(int i) {
-		switch (i) {
-		case 0:
-			heuristicFile = "Simple";
-			return new SimpleHeuristic();
-		case 1:
-			heuristicFile = "PBBG";
-			return new PBBGHeuristic();
-		case 2:
-			heuristicFile = "PBNearBG";
-			return new PBNearBGHeuristic();
+		if (strategy == null || strategy.isEmpty()) {
+			strategyArray = Arrays.asList(SearchStrategy.values());
+		} else {		
+			strategyArray.add(ArgsReader.getStrategy(strategy));
 		}
-		return null;
+			
+		if (heuristic == null || heuristic.isEmpty()) {
+			heuristicArray.add(new PBBGHeuristic());
+			heuristicArray.add(new PBNearBGHeuristic());
+			heuristicArray.add(new SimpleHeuristic());
+		} else {		
+			heuristicArray.add(ArgsReader.getHeuristic(heuristic));
+		}
 	}
-	
+
 	private static void printAverage(int iterations) throws FileNotFoundException {
-		PrintWriter averagePrinter = new PrintWriter(new File("average" + heuristicFile + "Heuristic.csv"));
+		PrintWriter averagePrinter = new PrintWriter(new File("average.csv"));
 		StringBuilder sba = new StringBuilder();
-		sba.append("Board").append(",Strategy").append(",Elapsed time [ms]\n");
+		sba.append("Board").append(";Strategy").append(";Elapsed time [ms]\n");
 		for (String boardName : average.keySet()) {
 			for (SearchStrategy strategy : average.get(boardName).keySet()) {
 				long elapsedTime = 0;
 				for (BoardResults boardResult : average.get(boardName).get(strategy)) {
-					elapsedTime += boardResult.getElapsedTime();
+					elapsedTime = elapsedTime + boardResult.getElapsedTime();
 				}
-				if (average.get(boardName).get(strategy).size() != 0) {
-					elapsedTime = elapsedTime / average.get(boardName).get(strategy).size();
-				}
-				sba.append(boardName).append(";").append(strategy.toString()).append(";").append(String.format("%f", elapsedTime / 10E6)).append('\n');
+
+				elapsedTime = elapsedTime / average.get(boardName).get(strategy).size();
+				sba.append(boardName).append(";").append(strategy.toString()).append(";").append(String.format("%f", elapsedTime / 1E6)).append('\n');
 			}
 		}	
         averagePrinter.write(sba.toString());
@@ -103,61 +108,65 @@ public class Metrics {
 	}
 
 	private static void printHeaders(int iteration) throws FileNotFoundException {
-		pw = new PrintWriter(new File("test_" + iteration + heuristicFile + "Heuristic.csv"));
-		sb = new StringBuilder();
-		sb.append("Board").append(";Strategy").append(";Distance").append(";Elapsed time [ms]\n");
+		testPrintWriter = new PrintWriter(new File("test_" + iteration + ".csv"));
+		testStringBuilder = new StringBuilder();
+		testStringBuilder.append("Board").append(";Heuristic").append(";Strategy").append(";Distance").append(";Elapsed time [ms]\n");
 	}
 
-	public static Set<Integer> printMetrics(List<String> boardArray, List<SearchStrategy> strategyArray) throws FileNotFoundException {
-		
-		try {
-			for (String boardName : boardArray) {
-				if (!average.containsKey(boardName)) {
-					average.put(boardName, new HashMap<>());
-				}
-				for (SearchStrategy searchStrategy: strategyArray) {
-					if (!average.get(boardName).containsKey(searchStrategy)) {
-						average.get(boardName).put(searchStrategy, new HashSet<>());
-					}
-                    final SokobanProblem problem = new SokobanProblem(ArgsReader.getFilePath(boardName), heuristic);
-			    	final GPSEngine engine = new GPSEngine(problem, searchStrategy);
-
-                    sb.append(boardName).append(";").append(searchStrategy.toString());
-
-			    	try {
-						final long elapsedTime = Main.findSolution(engine);
-
-						if (engine.isFailed()) {
-							sb.append(";-1;-1\n");
-						}
-
-						if (engine.isFinished() && !engine.isFailed()) {
-							GPSNode solutionNode = engine.getSolutionNode();
-							int nodeCount = 0;
-
-							do {
-								nodeCount++;
-								solutionNode = solutionNode.getParent();
-							} while (solutionNode != null);
-
-							sb.append(String.format(";%d", nodeCount));
-							sb.append(String.format(";%f\n", elapsedTime / 1E6));
-							average.get(boardName).get(searchStrategy).add(new BoardResults(boardName, searchStrategy, nodeCount, elapsedTime / 1E6));
-						}
-					} catch (InterruptedException | ExecutionException e) {
-						e.printStackTrace();
-					} catch (TimeoutException e) {
-						sb.append(";-;-\n");
-					}
-				}
-			}
-	        pw.write(sb.toString());
-	        pw.close();
-			System.out.println("CSV Printed");
-		} catch (NonExistingFileException e) {
-			System.out.println("Board not found!");
+	public static void printMetrics(List<String> boardArray, List<SearchStrategy> strategyArray, List<Heuristic> heuristicArray) throws FileNotFoundException {	
+		for (Heuristic heuristic : heuristicArray) {
+			printBoards(boardArray, strategyArray, heuristic);
 		}
-		return null;
 	}
 
+	private static void printBoards(List<String> boardArray, List<SearchStrategy> strategyArray, Heuristic heuristic) {
+		for (String boardName : boardArray) {
+			if (!average.containsKey(boardName)) {
+				average.put(boardName, new HashMap<>());
+			}
+			printStrategies(boardName, strategyArray, heuristic);
+		}
+		
+	}
+
+	private static void printStrategies(String boardName, List<SearchStrategy> strategyArray, Heuristic heuristic) {
+
+		for (SearchStrategy searchStrategy: strategyArray) {
+			System.out.println("Solving " +  boardName + " - " + heuristic + " & " + searchStrategy.toString());
+			if (!average.get(boardName).containsKey(searchStrategy)) {
+				average.get(boardName).put(searchStrategy, new HashSet<>());
+			}
+			
+            final SokobanProblem problem = new SokobanProblem(boardName, heuristic);
+	    	final GPSEngine engine = new GPSEngine(problem, searchStrategy);
+
+            testStringBuilder.append(boardName).append(";"+heuristic).append(";" + searchStrategy.toString());
+
+	    	try {
+				final long elapsedTime = Main.findSolution(engine);
+
+				if (engine.isFailed()) {
+					testStringBuilder.append(";-1;-1\n");
+				}
+
+				if (engine.isFinished() && !engine.isFailed()) {
+					GPSNode solutionNode = engine.getSolutionNode();
+					int nodeCount = 0;
+
+					do {
+						nodeCount++;
+						solutionNode = solutionNode.getParent();
+					} while (solutionNode != null);
+
+					testStringBuilder.append(String.format(";%d", nodeCount));
+					testStringBuilder.append(String.format(";%f\n", elapsedTime / 1E6));
+					average.get(boardName).get(searchStrategy).add(new BoardResults(boardName, searchStrategy, nodeCount, elapsedTime));
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			} catch (TimeoutException e) {
+				testStringBuilder.append(";-;-\n");
+			}
+		}
+	}
 }

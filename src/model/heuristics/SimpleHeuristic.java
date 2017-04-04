@@ -20,4 +20,8 @@ public class SimpleHeuristic implements Heuristic {
 
         return totalBoxes - boxesInPlace;
     }
+    
+    public String toString() {
+    	return "Simple Heuristic";
+    }
 }

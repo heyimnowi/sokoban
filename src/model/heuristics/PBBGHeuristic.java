@@ -35,4 +35,8 @@ public class PBBGHeuristic implements Heuristic {
 
         return playerBoxDistance + boxesGoalDistance;
     }
+    
+    public String toString() {
+    	return "PBBG Heuristic";
+    }
 }

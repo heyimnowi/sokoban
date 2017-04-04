@@ -3,10 +3,6 @@ package sokoban;
 import exceptions.StrategyNotFoundException;
 import gps.GPSEngine;
 import gps.GPSNode;
-import model.heuristics.NearPBBGHeuristic;
-import model.heuristics.PBBGHeuristic;
-import model.heuristics.PBNearBGHeuristic;
-import model.heuristics.SimpleHeuristic;
 import sokoban.SokobanProblem;
 import sokoban.SokobanState;
 import utils.ArgsReader;
@@ -19,6 +15,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.*;
 
+import exceptions.HeuristicNotFoundException;
 import exceptions.NonExistingFileException;
 
 public class Main {
@@ -31,19 +28,20 @@ public class Main {
     		final String board = properties.getProperty("board");
     		final String strategy = properties.getProperty("strategy");
     		final String iterationsString = properties.getProperty("iterations");
+    		final String heuristic = properties.getProperty("heuristic");
     		int iterations = 1;
     		
     		if (!iterationsString.isEmpty() && iterationsString != null) {
     			iterations = Integer.valueOf(iterationsString);
     		}
     		
-    		if (board != null && !board.isEmpty() && strategy != null && !strategy.isEmpty()) {
-    			getSolution(board, strategy);
+    		if (board != null && !board.isEmpty() && strategy != null && !strategy.isEmpty() && !heuristic.isEmpty() && heuristic != null) {
+    			getSolution(board, strategy, heuristic);
     		} else {
     			if (iterations == 0) {
     				iterations = 1;
     			}
-    			Metrics.getMetrics(board, strategy, iterations);
+    			Metrics.getMetrics(board, strategy, heuristic, iterations);
     		}
 		} catch (IOException e) {
 			System.out.println("Cant read config.properties");
@@ -53,10 +51,10 @@ public class Main {
 		}	
     }
 
-	private static void getSolution(String fileName, String strategy) {
+	private static void getSolution(String fileName, String strategy, String heuristic) {
 		try {
 			final String path = ArgsReader.getFilePath(fileName);
-	    	final SokobanProblem problem = new SokobanProblem(path, new PBNearBGHeuristic());
+	    	final SokobanProblem problem = new SokobanProblem(path, ArgsReader.getHeuristic(heuristic));
 	    	final GPSEngine engine = new GPSEngine(problem, ArgsReader.getStrategy(strategy));
             final long elapsedTime = findSolution(engine);
 
@@ -89,7 +87,9 @@ public class Main {
             e.printStackTrace();
         } catch (TimeoutException e) {
             System.out.println("Time out");
-        }
+        } catch (HeuristicNotFoundException e) {
+        	System.out.println("Heuristic not found!");
+		}
     }
 	
 	private static Properties getProperties() throws IOException {

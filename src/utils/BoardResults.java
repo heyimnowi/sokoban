@@ -6,9 +6,9 @@ public class BoardResults {
 	private String boardName;
 	private SearchStrategy strategy;
 	private int nodeCount;
-	private double elapsedTime;
+	private long elapsedTime;
 	
-	public BoardResults(String boardName, SearchStrategy strategy, int nodeCount, double elapsedTime) {
+	public BoardResults(String boardName, SearchStrategy strategy, int nodeCount, long elapsedTime) {
 		this.boardName = boardName;
 		this.nodeCount = nodeCount;
 		this.elapsedTime = elapsedTime;
@@ -31,11 +31,11 @@ public class BoardResults {
 		this.nodeCount = nodeCount;
 	}
 
-	public double getElapsedTime() {
+	public long getElapsedTime() {
 		return elapsedTime;
 	}
 
-	public void setElapsedTime(double elapsedTime) {
+	public void setElapsedTime(long elapsedTime) {
 		this.elapsedTime = elapsedTime;
 	}
 }

@@ -2,9 +2,14 @@ package utils;
 
 import java.io.File;
 
+import exceptions.HeuristicNotFoundException;
 import exceptions.NonExistingFileException;
 import exceptions.StrategyNotFoundException;
 import gps.SearchStrategy;
+import model.heuristics.Heuristic;
+import model.heuristics.PBBGHeuristic;
+import model.heuristics.PBNearBGHeuristic;
+import model.heuristics.SimpleHeuristic;
 
 public class ArgsReader {
 	
@@ -24,6 +29,19 @@ public class ArgsReader {
 			return strategyValue;
 		} catch (Exception e) {
 			throw new StrategyNotFoundException();
+		}
+	}
+	
+	public static Heuristic getHeuristic(String heuristic) throws HeuristicNotFoundException {
+		switch (heuristic.toUpperCase()) {
+		case "PBBG":
+			return new PBBGHeuristic();
+		case "PBNEARBG":
+			return new PBNearBGHeuristic();
+		case "SIMPLE":
+			return new SimpleHeuristic();
+		default:
+			throw new HeuristicNotFoundException();
 		}
 	}
 }

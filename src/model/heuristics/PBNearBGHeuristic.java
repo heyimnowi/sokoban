@@ -36,4 +36,8 @@ public class PBNearBGHeuristic implements Heuristic {
 
         return playerBoxDistance + boxesGoalDistance;
     }
+    
+    public String toString() {
+    	return "PBNearBG Heuristic";
+    }
 }
