@@ -1,8 +1,8 @@
-package gps.api;
+package gps1.api;
 
 import java.util.Optional;
 
-import gps.exception.NotAppliableException;
+import gps1.exception.NotAppliableException;
 
 /**
  * GPSRule interface.

@@ -1,8 +1,8 @@
 package sokoban;
 
-import gps.api.GPSProblem;
-import gps.api.GPSRule;
-import gps.api.GPSState;
+import gps2.api.GPSProblem;
+import gps2.api.GPSRule;
+import gps2.api.GPSState;
 import model.Board;
 import model.Position;
 import model.heuristics.Heuristic;

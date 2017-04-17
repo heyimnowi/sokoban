@@ -1,6 +1,6 @@
 package model.heuristics;
 
-import gps.api.GPSState;
+import gps2.api.GPSState;
 
 public interface Heuristic {
 

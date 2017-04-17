@@ -1,6 +1,6 @@
 package sokoban;
 
-import gps.api.GPSState;
+import gps2.api.GPSState;
 import model.Board;
 import model.Position;
 

@@ -1,8 +1,8 @@
 package sokoban;
 
 import exceptions.StrategyNotFoundException;
-import gps.GPSEngine;
-import gps.GPSNode;
+import gps2.GPSEngine;
+import gps2.GPSNode;
 import sokoban.SokobanProblem;
 import sokoban.SokobanState;
 import utils.ArgsReader;

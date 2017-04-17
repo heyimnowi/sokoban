@@ -1,4 +1,4 @@
-package gps.exception;
+package gps1.exception;
 
 public class NotAppliableException extends Exception {
 

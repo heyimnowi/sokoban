@@ -1,7 +1,7 @@
 package sokoban;
 
-import gps.api.GPSRule;
-import gps.api.GPSState;
+import gps2.api.GPSRule;
+import gps2.api.GPSState;
 
 import java.util.Optional;
 

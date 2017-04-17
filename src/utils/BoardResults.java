@@ -1,6 +1,6 @@
 package utils;
 
-import gps.SearchStrategy;
+import gps2.SearchStrategy;
 
 public class BoardResults {
 	private String boardName;

@@ -1,7 +1,7 @@
-package gps;
+package gps1;
 
-import gps.api.GPSRule;
-import gps.api.GPSState;
+import gps1.api.GPSRule;
+import gps1.api.GPSState;
 
 public class GPSNode {
 

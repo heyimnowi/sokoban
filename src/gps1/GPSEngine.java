@@ -1,8 +1,8 @@
-package gps;
+package gps1;
 
-import gps.api.GPSProblem;
-import gps.api.GPSRule;
-import gps.api.GPSState;
+import gps1.api.GPSProblem;
+import gps1.api.GPSRule;
+import gps1.api.GPSState;
 
 import java.util.ArrayList;
 import java.util.Collection;

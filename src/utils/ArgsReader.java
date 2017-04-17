@@ -5,7 +5,7 @@ import java.io.File;
 import exceptions.HeuristicNotFoundException;
 import exceptions.NonExistingFileException;
 import exceptions.StrategyNotFoundException;
-import gps.SearchStrategy;
+import gps2.SearchStrategy;
 import model.heuristics.Heuristic;
 import model.heuristics.PBBGHeuristic;
 import model.heuristics.PBNearBGHeuristic;
