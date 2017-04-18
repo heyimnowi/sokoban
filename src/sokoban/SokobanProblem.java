@@ -32,6 +32,7 @@ public class SokobanProblem implements GPSProblem {
             initState = new SokobanState(board);
             solutionBoard = board.getSolutionBoard();
         } catch (IOException ex) {
+        	ex.printStackTrace();
             // TODO
         }
     }

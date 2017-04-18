@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 public class Metrics {
 	
@@ -67,7 +68,9 @@ public class Metrics {
 	
 	private static void getParams(String board, String strategy, String heuristic) throws NonExistingFileException, StrategyNotFoundException, HeuristicNotFoundException {
 		if (board == null || board.isEmpty()){
-			boardArray = FileScanner.listFiles("res/boards");
+			boardArray = FileScanner.listFiles("res/boards").stream()
+					.map((String path) -> "res/boards/" + path)
+					.collect(Collectors.toList());
 		} else {
 			boardArray.add(ArgsReader.getFilePath(board));
 		}
